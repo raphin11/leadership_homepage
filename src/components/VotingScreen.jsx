@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function VotingScreen({
   roundNumber,
@@ -10,7 +11,7 @@ export default function VotingScreen({
   onSubmitVote,
   participant
 }) {
-  const [selectedTemp, setSelectedTemp] = useState(null);
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 투표 확인 및 제출
@@ -18,7 +19,7 @@ export default function VotingScreen({
     if (hasVoted || isSubmitting) return;
 
     // 모바일 터치 실수 방지를 위해 확인창 또는 즉시 확정
-    const confirmMessage = `[ ${choice} ] 를 선택하시겠습니까?\n\n⚠️ 한 번 투표하면 번복할 수 없습니다!`;
+    const confirmMessage = t('voting.confirmPrompt', { choice });
     if (window.confirm(confirmMessage)) {
       setIsSubmitting(true);
       onSubmitVote(choice);
@@ -30,20 +31,20 @@ export default function VotingScreen({
       {/* 상단 라운드 배지 */}
       <div className="flex items-center gap-2 mb-4">
         <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-          문제 {roundNumber}
+          {t('voting.questionBadge')} {roundNumber}
         </span>
         <span className="text-xs text-slate-400">
-          전체 {totalQuestions}문제 중 {roundNumber}번째
+          {t('voting.progress', { current: roundNumber, total: totalQuestions })}
         </span>
       </div>
 
       {/* 메인 타이틀: 문제 번호 강조 */}
       <div className="text-center mb-6">
         <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-2">
-          문제 {roundNumber} 투표
+          {t('voting.title', { round: roundNumber })}
         </h2>
         <p className="text-sm text-slate-300">
-          🖥️ PPT 화면의 문제와 선택지를 확인하고 <span className="font-bold text-amber-400">A</span> 또는 <span className="font-bold text-amber-400">B</span>를 골라주세요!
+          {t('voting.desc')}
         </p>
       </div>
 
@@ -61,10 +62,10 @@ export default function VotingScreen({
                 <span className="text-3xl sm:text-4xl font-black text-white">A</span>
               </div>
               <span className="text-base sm:text-lg font-bold text-white tracking-wide">
-                선택지 A 투표
+                {t('voting.choiceA')}
               </span>
               <span className="text-xs text-cyan-200 mt-1">
-                터치하여 즉시 선택
+                {t('voting.tapToChoose')}
               </span>
             </button>
 
@@ -78,10 +79,10 @@ export default function VotingScreen({
                 <span className="text-3xl sm:text-4xl font-black text-white">B</span>
               </div>
               <span className="text-base sm:text-lg font-bold text-white tracking-wide">
-                선택지 B 투표
+                {t('voting.choiceB')}
               </span>
               <span className="text-xs text-rose-200 mt-1">
-                터치하여 즉시 선택
+                {t('voting.tapToChoose')}
               </span>
             </button>
           </div>
@@ -89,7 +90,7 @@ export default function VotingScreen({
           {/* 투표 번복 불가 경고 */}
           <div className="flex items-center justify-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold text-center">
             <span>⚠️</span>
-            <span>투표 결과는 번복할 수 없습니다. 신중하게 선택해주세요!</span>
+            <span>{t('voting.warningIrreversible')}</span>
           </div>
         </div>
       ) : (
@@ -102,10 +103,10 @@ export default function VotingScreen({
 
           <div>
             <h3 className="text-2xl font-black text-white mb-2">
-              투표가 완료되었습니다!
+              {t('voting.votedTitle')}
             </h3>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700">
-              <span className="text-xs text-slate-400">내가 선택한 항목:</span>
+              <span className="text-xs text-slate-400">{t('voting.myChoiceLabel')}</span>
               <span className={`text-xl font-black ${myChoice === 'A' ? 'text-cyan-400' : 'text-rose-400'}`}>
                 [ {myChoice} ]
               </span>
@@ -117,16 +118,16 @@ export default function VotingScreen({
             <div className="flex items-start gap-2.5">
               <span className="text-base mt-0.5">🔒</span>
               <div>
-                <p className="text-xs font-bold text-rose-300">투표 결과 번복 불가</p>
-                <p className="text-xs text-slate-400 mt-0.5">이미 제출된 투표는 변경하거나 취소할 수 없습니다.</p>
+                <p className="text-xs font-bold text-rose-300">{t('voting.ruleLockedTitle')}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{t('voting.ruleLockedDesc')}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-2.5">
               <span className="text-base mt-0.5">⏳</span>
               <div>
-                <p className="text-xs font-bold text-amber-300">투표 직후 결과 비공개</p>
-                <p className="text-xs text-slate-400 mt-0.5">모든 참가자의 투표가 마감되고 진행자가 발표할 때까지 승패 및 득표 결과는 공개되지 않습니다.</p>
+                <p className="text-xs font-bold text-amber-300">{t('voting.ruleSecretTitle')}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{t('voting.ruleSecretDesc')}</p>
               </div>
             </div>
           </div>
@@ -135,7 +136,7 @@ export default function VotingScreen({
           <div className="pt-2">
             <div className="inline-flex items-center gap-2 text-xs font-semibold text-cyan-300 animate-pulse">
               <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-              진행자의 결과 발표를 기다리는 중입니다...
+              {t('voting.waitingHost')}
             </div>
           </div>
         </div>
@@ -144,8 +145,8 @@ export default function VotingScreen({
       {/* 하단 실시간 투표 완료 인원 수 (선택지 비율은 절대 노출하지 않음!) */}
       <div className="mt-8 flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 border border-slate-700 text-xs text-slate-300">
         <span>👥</span>
-        <span>현재 투표 현황:</span>
-        <span className="font-bold text-white">{votedCount}</span> / <span>{totalParticipants}명 완료</span>
+        <span>{t('voting.currentStatusLabel')}</span>
+        <span className="font-bold text-white">{votedCount}</span> / <span>{totalParticipants} {t('common.person')}</span>
       </div>
     </div>
   );

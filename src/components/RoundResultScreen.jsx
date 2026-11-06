@@ -1,10 +1,12 @@
 import React from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function RoundResultScreen({
   result,
   participant,
   myChoice
 }) {
+  const { t } = useLanguage();
   const isWinner = result?.winners?.some((w) => w.id === participant?.id);
   const isTie = result?.isTie;
   const winningOption = result?.winningOption;
@@ -13,7 +15,7 @@ export default function RoundResultScreen({
   if (!result) {
     return (
       <div className="text-center py-20 text-slate-400">
-        결과를 불러오는 중입니다...
+        ...
       </div>
     );
   }
@@ -27,11 +29,11 @@ export default function RoundResultScreen({
       {/* 상단 라운드 뱃지 */}
       <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-xs font-bold text-cyan-400 mb-3">
         <span>✨</span>
-        문제 {result.roundNumber} 최종 결과
+        {t('result.title', { round: result.roundNumber })}
       </div>
 
       <h2 className="text-3xl sm:text-4xl font-black text-white text-center mb-6">
-        {isTie ? '무승부 (동점)' : `소수결 승리: [ ${winningOption} ]`}
+        {isTie ? t('result.tie') : t('result.minorityWin', { option: winningOption })}
       </h2>
 
       {/* 내 결과 축하 / 위로 배너 */}
@@ -41,16 +43,19 @@ export default function RoundResultScreen({
             🏆
           </div>
           <h3 className="text-lg font-black text-amber-300">
-            축하합니다! 소수결에서 승리하셨습니다!
+            {t('result.congratsWinner')}
           </h3>
           <p className="text-xs text-amber-200 mt-1">
-            소속된 <span className="font-extrabold text-white">[{participant?.team}]</span>에 <span className="font-extrabold text-white">+{result.rewardPerWinner?.toLocaleString()}원</span>의 예산이 적립되었습니다!
+            {t('result.rewardAdded', {
+              team: participant?.team,
+              reward: (result.rewardPerWinner || 0).toLocaleString()
+            })}
           </p>
         </div>
       ) : (
         <div className="w-full mb-6 p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700 text-center text-xs text-slate-400">
-          내가 선택한 항목: <span className="font-bold text-white">[ {myChoice || '미참여'} ]</span>
-          {isTie ? ' — 동점으로 소수가 없어 상금이 지급되지 않았습니다.' : ' — 아쉽게도 다수(패배)를 선택하셨습니다.'}
+          {t('result.myChoice')} <span className="font-bold text-white">[ {myChoice || t('result.notVoted')} ]</span>
+          {isTie ? t('result.tieDesc') : t('result.loseDesc')}
         </div>
       )}
 
@@ -58,10 +63,10 @@ export default function RoundResultScreen({
       <div className="w-full glass-card rounded-2xl p-5 mb-6 shadow-xl space-y-4">
         <div className="flex justify-between items-center text-xs font-bold text-slate-300">
           <span className="flex items-center gap-1.5 text-cyan-400">
-            선택지 A {winningOption === 'A' && <span className="px-1.5 py-0.5 rounded bg-cyan-500 text-slate-950 text-[10px] font-black">승리(소수)</span>}
+            {t('result.optionA')} {winningOption === 'A' && <span className="px-1.5 py-0.5 rounded bg-cyan-500 text-slate-950 text-[10px] font-black">{t('result.minorityWinnerTag')}</span>}
           </span>
           <span className="flex items-center gap-1.5 text-rose-400">
-            {winningOption === 'B' && <span className="px-1.5 py-0.5 rounded bg-rose-500 text-slate-950 text-[10px] font-black">승리(소수)</span>} 선택지 B
+            {winningOption === 'B' && <span className="px-1.5 py-0.5 rounded bg-rose-500 text-slate-950 text-[10px] font-black">{t('result.minorityWinnerTag')}</span>} {t('result.optionB')}
           </span>
         </div>
 
@@ -75,7 +80,7 @@ export default function RoundResultScreen({
                 : 'bg-cyan-900/60 text-cyan-200'
             }`}
           >
-            {result.countA}표 ({percentA}%)
+            {result.countA}{t('common.votes')} ({percentA}%)
           </div>
           <div
             style={{ width: `${percentB}%` }}
@@ -85,12 +90,16 @@ export default function RoundResultScreen({
                 : 'bg-rose-900/60 text-rose-200'
             }`}
           >
-            {result.countB}표 ({percentB}%)
+            {result.countB}{t('common.votes')} ({percentB}%)
           </div>
         </div>
 
         <p className="text-[11px] text-slate-400 text-center">
-          총 투표 참여자: {total}명 (A: {result.countA}명 vs B: {result.countB}명)
+          {t('result.votersSummary', {
+            total,
+            countA: result.countA,
+            countB: result.countB
+          })}
         </p>
       </div>
 
@@ -100,11 +109,11 @@ export default function RoundResultScreen({
           <div className="flex items-center gap-2">
             <span className="text-lg">🎖️</span>
             <h3 className="font-extrabold text-white text-base">
-              이긴 사람 (소수결 승자) 명단
+              {t('result.winnersListTitle')}
             </h3>
           </div>
           <span className="px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-black">
-            총 {winners.length}명 승리
+            {t('result.winnersCountTag', { count: winners.length })}
           </span>
         </div>
 
@@ -130,21 +139,21 @@ export default function RoundResultScreen({
                   <span className="font-bold text-white text-sm">
                     {winner.name}
                     {winner.id === participant?.id && (
-                      <span className="ml-1 text-[11px] text-amber-300 font-bold">(나)</span>
+                      <span className="ml-1 text-[11px] text-amber-300 font-bold">{t('result.meTag')}</span>
                     )}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-1 text-emerald-400 font-black text-sm">
                   <span>🪙</span>
-                  +{(winner.reward || result.rewardPerWinner || 0).toLocaleString()}원
+                  +{(winner.reward || result.rewardPerWinner || 0).toLocaleString()}{t('common.currency')}
                 </div>
               </div>
             ))}
           </div>
         ) : (
           <div className="py-6 text-center text-slate-400 text-xs">
-            {isTie ? '동점으로 인해 소수인 승자가 없습니다.' : '승자가 없습니다.'}
+            {isTie ? t('result.tieNoWinners') : t('result.noWinners')}
           </div>
         )}
       </div>
@@ -152,7 +161,7 @@ export default function RoundResultScreen({
       {/* 대기 안내 */}
       <div className="mt-6 text-center text-xs text-slate-400 flex items-center gap-2">
         <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-        진행자의 다음 라운드 또는 중간집계 전환을 기다리고 있습니다.
+        {t('result.waitingNext')}
       </div>
     </div>
   );

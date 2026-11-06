@@ -1,22 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function JoinScreen({ onJoin }) {
+  const { lang, t } = useLanguage();
+  const defaultTeams = lang === 'en'
+    ? ['Team 1', 'Team 2', 'Team 3', 'Team 4', 'Team 5', 'Team 6', 'Team 7', 'Team 8']
+    : ['1조', '2조', '3조', '4조', '5조', '6조', '7조', '8조'];
+
   const [name, setName] = useState('');
-  const [team, setTeam] = useState('1조');
+  const [team, setTeam] = useState(defaultTeams[0]);
   const [customTeam, setCustomTeam] = useState('');
   const [isCustomTeam, setIsCustomTeam] = useState(false);
 
-  const defaultTeams = ['1조', '2조', '3조', '4조', '5조', '6조', '7조', '8조'];
+  useEffect(() => {
+    if (!isCustomTeam) {
+      setTeam(defaultTeams[0]);
+    }
+  }, [lang]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const finalTeam = isCustomTeam ? customTeam.trim() : team;
     if (!name.trim()) {
-      alert('이름을 입력해주세요.');
+      alert(t('join.alertName'));
       return;
     }
     if (!finalTeam) {
-      alert('조(팀)를 선택하거나 입력해주세요.');
+      alert(t('join.alertTeam'));
       return;
     }
     onJoin(name.trim(), finalTeam);
@@ -30,10 +40,10 @@ export default function JoinScreen({ onJoin }) {
           ✨
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500 bg-clip-text text-transparent">
-          리더십 밸런스 게임
+          {t('join.title')}
         </h1>
         <p className="text-sm text-slate-400 mt-2">
-          소수결 투표 & 조별 총예산 쟁탈전
+          {t('join.subtitle')}
         </p>
       </div>
 
@@ -42,13 +52,13 @@ export default function JoinScreen({ onJoin }) {
         {/* 이름 입력 */}
         <div>
           <label className="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-            <span>👤</span> 이름
+            <span>👤</span> {t('join.nameLabel')}
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="본인 성함을 입력하세요"
+            placeholder={t('join.namePlaceholder')}
             className="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 transition-all font-medium text-base"
             maxLength={10}
             autoFocus
@@ -58,26 +68,26 @@ export default function JoinScreen({ onJoin }) {
         {/* 조 선택 */}
         <div>
           <label className="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-            <span>👥</span> 소속 조 (팀)
+            <span>👥</span> {t('join.teamLabel')}
           </label>
           
           {/* 조 선택 퀵 버튼 그리드 */}
           <div className="grid grid-cols-4 gap-2 mb-3">
-            {defaultTeams.map((t) => (
+            {defaultTeams.map((tName) => (
               <button
-                key={t}
+                key={tName}
                 type="button"
                 onClick={() => {
-                  setTeam(t);
+                  setTeam(tName);
                   setIsCustomTeam(false);
                 }}
-                className={`py-2.5 rounded-xl text-sm font-bold transition-all ${
-                  !isCustomTeam && team === t
+                className={`py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                  !isCustomTeam && team === tName
                     ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/30 scale-102 ring-2 ring-cyan-300'
                     : 'bg-slate-800/70 text-slate-300 border border-slate-700/80 hover:bg-slate-700/60'
                 }`}
               >
-                {t}
+                {tName}
               </button>
             ))}
           </div>
@@ -87,9 +97,9 @@ export default function JoinScreen({ onJoin }) {
             <button
               type="button"
               onClick={() => setIsCustomTeam(!isCustomTeam)}
-              className="text-xs text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium mb-2"
+              className="text-xs text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium mb-2 cursor-pointer"
             >
-              {isCustomTeam ? '← 기본 조 목록에서 선택하기' : '+ 다른 조 이름 직접 입력하기'}
+              {isCustomTeam ? t('join.customTeamBack') : t('join.customTeamToggle')}
             </button>
 
             {isCustomTeam && (
@@ -97,7 +107,7 @@ export default function JoinScreen({ onJoin }) {
                 type="text"
                 value={customTeam}
                 onChange={(e) => setCustomTeam(e.target.value)}
-                placeholder="예: 리더조, 특별조 등"
+                placeholder={t('join.customTeamPlaceholder')}
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 font-medium text-sm"
                 maxLength={12}
               />
@@ -108,12 +118,12 @@ export default function JoinScreen({ onJoin }) {
         {/* 게임 규칙 핵심 안내 */}
         <div className="bg-slate-800/40 rounded-xl p-3.5 border border-slate-700/50 text-xs text-slate-300 space-y-1.5 leading-relaxed">
           <div className="font-semibold text-amber-400 flex items-center gap-1.5">
-            <span>🛡️</span> 소수결 게임 핵심 룰
+            <span>🛡️</span> {t('join.rulesTitle')}
           </div>
-          <p>• PPT 문제를 보고 <span className="text-cyan-300 font-bold">A</span> 또는 <span className="text-rose-400 font-bold">B</span>에 투표합니다.</p>
-          <p>• <span className="text-emerald-400 font-bold">더 적은 사람이 선택한 쪽(소수)</span>이 승리합니다!</p>
-          <p>• <span className="text-rose-400 font-bold">투표 직후 결과는 비공개</span>이며, <span className="text-rose-400 font-bold">한 번 투표하면 번복 불가</span>합니다.</p>
-          <p>• 승자가 획득한 예산은 <span className="text-amber-300 font-bold">소속 조의 총예산으로 합산</span>됩니다.</p>
+          <p>• {t('join.rule1')}</p>
+          <p>• {t('join.rule2')}</p>
+          <p>• {t('join.rule3')}</p>
+          <p>• {t('join.rule4')}</p>
         </div>
 
         {/* 입장 버튼 */}
@@ -121,7 +131,7 @@ export default function JoinScreen({ onJoin }) {
           type="submit"
           className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 active:scale-98 text-slate-950 font-extrabold text-base shadow-xl shadow-cyan-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
         >
-          입장하여 투표 준비하기 →
+          {t('join.submitBtn')}
         </button>
       </form>
     </div>
