@@ -1,3 +1,5 @@
+const defaultQuestions = require('./defaultQuestions');
+
 class GameManager {
   constructor() {
     this.reset();
@@ -6,7 +8,10 @@ class GameManager {
   reset() {
     this.status = 'LOBBY'; // 'LOBBY' | 'VOTING' | 'ROUND_RESULT' | 'SUMMARY'
     this.currentQuestionIndex = 0; // 0-based: 문제 1은 index 0
-    this.totalQuestions = 5; // 기본 5문제 (관리자가 조절 가능)
+
+    // 기본 문제 목록 복사
+    this.questions = JSON.parse(JSON.stringify(defaultQuestions));
+    this.totalQuestions = this.questions.length;
     
     // participants: Map of userId -> { id, name, team, totalBudget: 0, connected: true, socketId, roundWins: [] }
     this.participants = {};
@@ -14,18 +19,112 @@ class GameManager {
     // currentRoundVotes: Map of userId -> 'A' | 'B'
     this.currentRoundVotes = {};
     
-    // currentRoundResult: { roundNumber, countA, countB, winningOption, winners: [], isTie, rewardPerWinner }
+    // currentRoundResult: { roundNumber, countA, countB, winningOption, winners: [], isTie, rewardPerWinner, question }
     this.currentRoundResult = null;
     
     // history: Array of round results
     this.history = [];
     
-    // 예산 설정: 승자 1인당 기본 100,000원 (또는 문제당 총풀 설정)
+    // 예산 설정: 승자 1인당 기본 100,000원
     this.settings = {
-      rewardPerPerson: 100000, // 이긴 사람(소수인 사람) 1인당 지급 예산
-      rewardType: 'per_person', // 'per_person' (소수 승자 1인당 고정) or 'split_pool' (총 상금 N등분)
-      poolAmount: 500000 // split_pool일 때 라운드 총상금
+      rewardPerPerson: 100000,
+      rewardType: 'per_person', // 'per_person' | 'split_pool'
+      poolAmount: 500000
     };
+  }
+
+  // 현재 문제 객체 반환
+  getCurrentQuestion() {
+    const q = this.questions[this.currentQuestionIndex];
+    if (!q) {
+      return {
+        id: `q_${this.currentQuestionIndex + 1}`,
+        title: `문제 ${this.currentQuestionIndex + 1}`,
+        description: '',
+        optionA: '선택지 A',
+        optionB: '선택지 B'
+      };
+    }
+
+    return {
+      id: q.id,
+      title: q.title || `문제 ${this.currentQuestionIndex + 1}`,
+      description: q.description || '',
+      optionA: typeof q.optionA === 'object' ? q.optionA.text : (q.optionA || '선택지 A'),
+      optionB: typeof q.optionB === 'object' ? q.optionB.text : (q.optionB || '선택지 B')
+    };
+  }
+
+  // 관리자 기능: 새 문제 추가
+  addQuestion({ title, description, optionA, optionB }) {
+    if (!title || !title.trim()) {
+      return { success: false, message: '문제 제목을 입력해주세요.' };
+    }
+
+    const newQuestion = {
+      id: 'q_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+      title: title.trim(),
+      description: (description || '').trim(),
+      optionA: (optionA && optionA.trim()) ? optionA.trim() : '선택지 A',
+      optionB: (optionB && optionB.trim()) ? optionB.trim() : '선택지 B',
+      rewardAmount: this.settings.rewardPerPerson,
+      rewardType: this.settings.rewardType
+    };
+
+    this.questions.push(newQuestion);
+    this.totalQuestions = this.questions.length;
+
+    return { success: true, question: newQuestion, totalQuestions: this.totalQuestions };
+  }
+
+  // 관리자 기능: 문제 수정
+  editQuestion(id, { title, description, optionA, optionB }) {
+    const index = this.questions.findIndex(q => q.id === id);
+    if (index === -1) {
+      return { success: false, message: '수정할 문제를 찾을 수 없습니다.' };
+    }
+
+    if (title && title.trim()) {
+      this.questions[index].title = title.trim();
+    }
+    if (description !== undefined) {
+      this.questions[index].description = description.trim();
+    }
+    if (optionA && optionA.trim()) {
+      this.questions[index].optionA = optionA.trim();
+    }
+    if (optionB && optionB.trim()) {
+      this.questions[index].optionB = optionB.trim();
+    }
+
+    return { success: true, question: this.questions[index] };
+  }
+
+  // 관리자 기능: 문제 삭제
+  deleteQuestion(id) {
+    const prevLen = this.questions.length;
+    this.questions = this.questions.filter(q => q.id !== id);
+
+    if (this.questions.length === prevLen) {
+      return { success: false, message: '삭제할 문제를 찾을 수 없습니다.' };
+    }
+
+    this.totalQuestions = this.questions.length;
+    if (this.currentQuestionIndex >= this.questions.length && this.questions.length > 0) {
+      this.currentQuestionIndex = this.questions.length - 1;
+    }
+
+    return { success: true, totalQuestions: this.totalQuestions };
+  }
+
+  // 전체 문제 목록 교체
+  updateQuestions(questionsList) {
+    if (Array.isArray(questionsList)) {
+      this.questions = questionsList;
+      this.totalQuestions = questionsList.length;
+      return { success: true, totalQuestions: this.totalQuestions };
+    }
+    return { success: false, message: '올바른 문제 목록 형식이 아닙니다.' };
   }
 
   // 참가자 등록 또는 재접속
@@ -48,7 +147,7 @@ class GameManager {
         name: cleanName,
         team: cleanTeam,
         totalBudget: 0,
-        roundWins: [], // 승리한 라운드 번호들
+        roundWins: [],
         connected: true,
         socketId: socketId,
         joinedAt: Date.now()
@@ -120,7 +219,8 @@ class GameManager {
     return { 
       success: true, 
       roundNumber: this.currentQuestionIndex + 1,
-      totalQuestions: this.totalQuestions 
+      totalQuestions: this.totalQuestions,
+      currentQuestion: this.getCurrentQuestion()
     };
   }
 
@@ -213,6 +313,7 @@ class GameManager {
       winners: winnersWithReward, // 이긴 사람(소수인 사람들) 리스트!
       isTie: isTie,
       rewardPerWinner: rewardPerWinner,
+      question: this.getCurrentQuestion(),
       timestamp: Date.now()
     };
 
@@ -356,10 +457,11 @@ class GameManager {
       status: this.status,
       roundNumber: this.currentQuestionIndex + 1,
       totalQuestions: this.totalQuestions,
+      currentQuestion: this.getCurrentQuestion(),
       totalParticipants: totalParticipants,
       votedCount: votedCount,
       hasVoted: hasVoted,
-      myChoice: userVote, // 본인이 누른 것만 (A 또는 B)
+      myChoice: userVote,
       roundResult: roundResult,
       summary: summaryData,
       settings: {
@@ -376,6 +478,13 @@ class GameManager {
     return {
       ...publicState,
       participants: Object.values(this.participants),
+      questions: this.questions.map(q => ({
+        id: q.id,
+        title: q.title,
+        description: q.description || '',
+        optionA: typeof q.optionA === 'object' ? q.optionA.text : (q.optionA || '선택지 A'),
+        optionB: typeof q.optionB === 'object' ? q.optionB.text : (q.optionB || '선택지 B')
+      })),
       rawVotes: this.currentRoundVotes,
       history: this.history,
       summary: summary,

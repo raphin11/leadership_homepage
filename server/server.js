@@ -16,7 +16,7 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 3000;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin1234';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '6767';
 
 const game = new GameManager();
 
@@ -155,6 +155,15 @@ io.on('connection', (socket) => {
       case 'reset_game':
         game.reset();
         break;
+      case 'add_question':
+        game.addQuestion(payload);
+        break;
+      case 'edit_question':
+        game.editQuestion(payload?.id, payload);
+        break;
+      case 'delete_question':
+        game.deleteQuestion(payload?.id);
+        break;
       case 'update_questions':
         game.updateQuestions(payload?.questions);
         break;
@@ -202,7 +211,7 @@ app.get('*path', (req, res) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`===============================================`);
-  console.log(`🚀 Leadership Homepage Server Started!`);
+  console.log(`🚀 Minority Game (소수결 게임) Server Started!`);
   console.log(`📡 Local:   http://localhost:${PORT}`);
   console.log(`🌐 Network: http://${getLocalIpAddress()}:${PORT}`);
   console.log(`🔑 Admin PW: ${ADMIN_PASSWORD}`);

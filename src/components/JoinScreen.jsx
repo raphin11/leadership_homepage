@@ -4,8 +4,8 @@ import { useLanguage } from '../i18n/LanguageContext';
 export default function JoinScreen({ onJoin }) {
   const { lang, t } = useLanguage();
   const defaultTeams = lang === 'en'
-    ? ['Team 1', 'Team 2', 'Team 3', 'Team 4', 'Team 5', 'Team 6', 'Team 7', 'Team 8']
-    : ['1조', '2조', '3조', '4조', '5조', '6조', '7조', '8조'];
+    ? ['Team 1', 'Team 2', 'Team 3', 'Team 4', 'Team 5', 'Team 6', 'Team 7']
+    : ['1조', '2조', '3조', '4조', '5조', '6조', '7조'];
 
   const [name, setName] = useState('');
   const [team, setTeam] = useState(defaultTeams[0]);

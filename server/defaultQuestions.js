@@ -1,46 +1,46 @@
 module.exports = [
   {
     id: 'q1',
-    title: '리더십 밸런스 게임 #1',
-    description: '어떤 팀원과 함께 일하시겠습니까?',
-    optionA: { id: 'A', text: '일은 진짜 잘하는데 성격이 너무 까칠한 팀원' },
-    optionB: { id: 'B', text: '성격은 천사인데 일 처리가 너무 답답한 팀원' },
-    rewardAmount: 100000, // 승자 1인당 기본 예산 (또는 풀)
-    rewardType: 'per_person' // 'per_person' (승자당 고정) or 'split_pool' (총액 1/N)
+    title: '짜장면 vs 짬뽕',
+    description: '평생 중식을 먹을 때 딱 하나만 먹어야 한다면 당신의 선택은?',
+    optionA: '짜장면',
+    optionB: '짬뽕',
+    rewardAmount: 100000,
+    rewardType: 'per_person'
   },
   {
     id: 'q2',
-    title: '리더십 밸런스 게임 #2',
-    description: '리더로서 피하고 싶은 최악의 상황은?',
-    optionA: { id: 'A', text: '내 모든 기획과 공을 가로채는 유능한 상사' },
-    optionB: { id: 'B', text: '권한은 다 넘기면서 책임질 땐 쏙 빠지는 무능한 상사' },
+    title: '여름 vs 겨울',
+    description: '둘 중 하나를 무조건 골라 견뎌야 한다면?',
+    optionA: '에어컨 없는 한여름',
+    optionB: '난방 없는 한겨울',
     rewardAmount: 100000,
     rewardType: 'per_person'
   },
   {
     id: 'q3',
-    title: '근무 조건 밸런스 게임 #3',
-    description: '당신의 선택은?',
-    optionA: { id: 'A', text: '평생 100% 재택근무 (단, 연봉 15% 삭감)' },
-    optionB: { id: 'B', text: '평생 주5일 9 to 6 출근 (단, 연봉 20% 인상)' },
+    title: '확실한 5천만원 vs 50% 확률 2억원',
+    description: '단 한 번의 선택으로 상금을 획득한다면?',
+    optionA: '100% 확률로 5,000만원 받기',
+    optionB: '50% 확률로 2억원 받기 (꽝이면 0원)',
     rewardAmount: 100000,
     rewardType: 'per_person'
   },
   {
     id: 'q4',
-    title: '인생 밸런스 게임 #4',
-    description: '둘 중 하나를 무조건 골라야 한다면?',
-    optionA: { id: 'A', text: '내가 모든 사람의 마음속 생각을 읽을 수 있는 능력' },
-    optionB: { id: 'B', text: '모든 사람이 내 생각에 무조건 설득당하는 말빨' },
+    title: '과거로 가기 vs 미래로 가기',
+    description: '타임머신을 타고 단 한 번 이동할 수 있다면?',
+    optionA: '10년 전 과거로 가기 (현재 기억 유지)',
+    optionB: '10년 후 미래로 가기',
     rewardAmount: 100000,
     rewardType: 'per_person'
   },
   {
     id: 'q5',
-    title: '회식 밸런스 게임 #5',
-    description: '금요일 저녁, 더 나은 회식은?',
-    optionA: { id: 'A', text: '1인 30만원 최고급 한우 오마카세 (단, 대표님 옆자리)' },
-    optionB: { id: 'B', text: '동네 치맥집 (단, 법카 주고 대표님은 즉시 귀가)' },
+    title: '속마음 읽기 vs 설득의 달인',
+    description: '초능력을 하나 가질 수 있다면?',
+    optionA: '모든 사람의 속마음을 들을 수 있는 능력',
+    optionB: '누구든 내 생각대로 설득하는 최고의 말빨',
     rewardAmount: 150000,
     rewardType: 'per_person'
   }
